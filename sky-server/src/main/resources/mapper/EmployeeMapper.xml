@@ -19,23 +19,32 @@
         UPDATE employee
         <set>
             <if test="username != null and username != ''">
-                username = #{username}, </if>
+                username = #{username},
+            </if>
             <if test="name != null and name != ''">
-                name = #{name}, </if>
+                name = #{name},
+            </if>
             <if test="password != null and password != ''">
-                password = #{password}, </if>
+                password = #{password},
+            </if>
             <if test="phone != null and phone != ''">
-                phone = #{phone},</if>
+                phone = #{phone},
+            </if>
             <if test="sex != null and sex != ''">
-                sex = #{sex},</if>
+                sex = #{sex},
+            </if>
             <if test="idNumber != null and idNumber != ''">
-                id_number = #{idNumber},</if>
+                id_number = #{idNumber},
+            </if>
             <if test="status != null">
-                status = #{status},</if>
+                status = #{status},
+            </if>
             <if test="updateTime != null">
-                update_time = #{updateTime},</if>
+                update_time = #{updateTime},
+            </if>
             <if test="updateUser != null">
-                update_user = #{updateUser},</if>
+                update_user = #{updateUser},
+            </if>
         </set>
         WHERE id = #{id}
     </update>
