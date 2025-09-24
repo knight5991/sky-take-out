@@ -51,10 +51,10 @@ public class CategoryServiceImpl implements CategoryService {
     public void insert(CategoryDTO categoryDTO) {
         Category category = new Category();
         BeanUtils.copyProperties(categoryDTO, category);
-        category.setCreateTime(LocalDateTime.now());
-        category.setCreateUser(BaseContext.getCurrentId());
-        category.setUpdateTime(LocalDateTime.now());
-        category.setUpdateUser(BaseContext.getCurrentId());
+//        category.setCreateTime(LocalDateTime.now());
+//        category.setCreateUser(BaseContext.getCurrentId());
+//        category.setUpdateTime(LocalDateTime.now());
+//        category.setUpdateUser(BaseContext.getCurrentId());
         category.setStatus(0);
         categoryMapper.insert(category);
     }
@@ -68,10 +68,9 @@ public class CategoryServiceImpl implements CategoryService {
     public void stopOrOpen(int status, long id) {
         Category category = Category.builder()
                 .status(status)
-                .id(id)
-                .updateTime(LocalDateTime.now())
-                .updateUser(BaseContext.getCurrentId()).build();
-
+//               .updateTime(LocalDateTime.now())
+//               .updateUser(BaseContext.getCurrentId())
+                .id(id).build();
         categoryMapper.update(category);
     }
 
@@ -94,22 +93,23 @@ public class CategoryServiceImpl implements CategoryService {
     public void update(CategoryDTO categoryDTO) {
         Category category = new Category();
         BeanUtils.copyProperties(categoryDTO, category);
-        category.setUpdateTime(LocalDateTime.now());
-        category.setUpdateUser(BaseContext.getCurrentId());
+//        category.setUpdateTime(LocalDateTime.now());
+//        category.setUpdateUser(BaseContext.getCurrentId());
         categoryMapper.update(category);
     }
 
     /**
      * 删除分类
+     *
      * @param id
      */
     public void delete(Long id) {
-        int count  = dishMapper.getCounts(id);
-        if (count > 0){
+        int count = dishMapper.getCounts(id);
+        if (count > 0) {
             throw new DeletionNotAllowedException(MessageConstant.CATEGORY_BE_RELATED_BY_DISH);
         }
         count = setMealMapper.getCounts(id);
-        if (count > 0){
+        if (count > 0) {
             throw new DeletionNotAllowedException(MessageConstant.CATEGORY_BE_RELATED_BY_SETMEAL);
         }
         categoryMapper.delete(id);
