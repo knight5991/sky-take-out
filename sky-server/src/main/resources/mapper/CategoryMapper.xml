@@ -14,7 +14,7 @@
             <if test="type != null and type != ''">
                 and type = #{type}
             </if>
-        </where>
+        </where>a
         order by sort
     </select>
     <update id="update" parameterType="com.sky.entity.Category">

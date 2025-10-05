@@ -1,5 +1,6 @@
 package com.sky.controller.admin;
 
+import com.sky.constant.MessageConstant;
 import com.sky.result.Result;
 import com.sky.utils.AliOssUtil;
 import io.swagger.annotations.Api;
@@ -30,11 +31,18 @@ public class CommonController {
      */
     @ApiOperation("文件上传接口")
     @PostMapping("/upload")
-    public Result<String> upload(@RequestBody MultipartFile file) throws IOException {
-        String originalFilename = file.getOriginalFilename();
-        String extend = originalFilename.substring(originalFilename.lastIndexOf("."));
-        String objectName = UUID.randomUUID().toString() + extend;
-        String dir = aliOssUtil.upload(file.getBytes(), objectName);
-        return Result.success(dir);
+    public Result<String> upload(@RequestBody MultipartFile file){
+        try {
+            String originalFilename = file.getOriginalFilename();
+            String extend = originalFilename.substring(originalFilename.lastIndexOf("."));
+            String objectName = UUID.randomUUID().toString() + extend;
+            String dir = null;
+            dir = aliOssUtil.upload(file.getBytes(), objectName);
+            return Result.success(dir);
+
+        } catch (IOException e) {
+            log.info("文件上传失败:{}",e);
+        }
+        return Result.error(MessageConstant.UPLOAD_FAILED);
     }
 }
