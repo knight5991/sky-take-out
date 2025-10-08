@@ -25,6 +25,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -82,13 +83,19 @@ public class DishServiceImpl implements DishService {
      * 更新菜品
      * @param dishDTO
      */
+    @Transactional
     public void update(DishDTO dishDTO) {
         Dish dish = new Dish();
         BeanUtils.copyProperties(dishDTO,dish);
         dishMapper.update(dish);
         //todo 修改关联的口味
-
-
+        //这里修改口味时先删除原本的口味再添加新的口味
+        flavorMapper.deleteByDishId(Collections.singletonList(dish.getId()));
+        List<DishFlavor> flavors = dishDTO.getFlavors();
+        for (DishFlavor flavor : flavors) {
+            flavor.setDishId(dish.getId());
+        }
+        flavorMapper.save(flavors);
 
     }
 

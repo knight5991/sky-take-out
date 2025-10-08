@@ -9,3 +9,8 @@ sky:
   alioos:
     endpoint: oss-cn-guangzhou.aliyuncs.com
     bucket-name: sky-take-out552
+  redis:
+    host: localhost
+    port: 6379
+    password: root
+    database: 10
