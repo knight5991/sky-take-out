@@ -114,4 +114,13 @@ public class CategoryServiceImpl implements CategoryService {
         }
         categoryMapper.delete(id);
     }
+
+    /**
+     * 查询所有分类
+     * @return
+     */
+    public List<Category> getCategoryList() {
+        List<Category> list = categoryMapper.selete();
+        return list;
+    }
 }

@@ -17,13 +17,16 @@ import com.sky.mapper.SetMealMapper;
 import com.sky.mapper.SetmealDishMapper;
 import com.sky.result.PageResult;
 import com.sky.service.SetMealService;
+import com.sky.vo.DishItemVO;
 import com.sky.vo.SetmealVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 @Service
 @Slf4j
@@ -135,5 +138,34 @@ public class SetMealServiceImpl implements SetMealService {
        setMealMapper.delete(ids);
        //2.删除套餐表所绑定的菜品信息
         setmealDishMapper.deleteBySetMealIds(ids);
+    }
+
+    /**
+     * 根据分类id查询套餐
+     * @param categoryId
+     * @return
+     */
+    public List<Setmeal> getList(int categoryId) {
+        List<Setmeal>list = setMealMapper.getList(categoryId);
+        return list;
+    }
+
+    /**
+     * 查对应套餐下的菜品
+     * @param setMealId
+     * @return
+     */
+    public List<DishItemVO> getDish(Integer setMealId) {
+        List<Dish> dishes = dishMapper.selectBySetMealId(String.valueOf(setMealId));
+
+        List<DishItemVO> list = new ArrayList<>();
+        for (Dish dish : dishes) {
+            DishItemVO dishItemVO = new DishItemVO();
+            BeanUtils.copyProperties(dish,dishItemVO);
+            int copies = setmealDishMapper.getCopiesByDishId(dish.getId());
+            dishItemVO.setCopies(copies);
+            list.add(dishItemVO);
+        }
+        return list;
     }
 }

@@ -42,4 +42,14 @@ public interface SetmealDishMapper {
      * @param ids
      */
     void deleteBySetMealIds(List<Long> ids);
+
+
+    /**
+     * 根据菜品id查询份数
+     * @param id
+     * @return
+     */
+    @Select("select copies from setmeal_dish where dish_id = #{id}")
+    int getCopiesByDishId(Long id);
+
 }

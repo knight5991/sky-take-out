@@ -52,4 +52,11 @@ public interface CategoryMapper {
      */
     @Delete("delete from category where id = #{id}")
     void delete(Long id);
+
+    /**
+     * 查询所有分类
+     * @return
+     */
+    @Select("select * from category where status = 1")
+    List<Category> selete();
 }

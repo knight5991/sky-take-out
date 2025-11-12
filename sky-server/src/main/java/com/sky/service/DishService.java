@@ -53,4 +53,11 @@ public interface DishService {
      * @param ids
      */
     void delete(List<Long> ids) throws Exception;
+
+    /**
+     * 查询指定分类下的菜品列表（携带口味）
+     * @param categoryId
+     * @return
+     */
+    List<DishVO> getList(int categoryId);
 }
