@@ -17,19 +17,23 @@ import com.sky.mapper.SetmealDishMapper;
 import com.sky.result.PageResult;
 import com.sky.service.DishService;
 import com.sky.vo.DishVO;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionContext;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 @Service
+@Slf4j
 public class DishServiceImpl implements DishService {
     @Autowired
     DishMapper dishMapper;
@@ -37,6 +41,9 @@ public class DishServiceImpl implements DishService {
     FlavorMapper flavorMapper;
     @Autowired
     SetmealDishMapper setmealDishMapper;
+
+    @Autowired
+    RedisTemplate redisTemplate;
     /**
      * 新增菜品方法
      */
@@ -76,6 +83,9 @@ public class DishServiceImpl implements DishService {
      * @param id
      */
     public void stopAndUp(String status, String id) {
+        //删除缓存中的数据,因为这里没有菜品的分类id，直接删除所有菜品的缓存数据
+        deleteCache("dish_*");
+
         Dish dish = Dish.builder().id((long) Integer.parseInt(id)).status(Integer.valueOf(status)).build();
         dishMapper.update(dish);
     }
@@ -86,6 +96,9 @@ public class DishServiceImpl implements DishService {
      */
     @Transactional
     public void update(DishDTO dishDTO) {
+        //删除对应菜品分类的缓存数据
+        deleteCache("dish_"+dishDTO.getCategoryId());
+
         Dish dish = new Dish();
         BeanUtils.copyProperties(dishDTO,dish);
         dishMapper.update(dish);
@@ -93,10 +106,13 @@ public class DishServiceImpl implements DishService {
         //这里修改口味时先删除原本的口味再添加新的口味
         flavorMapper.deleteByDishId(Collections.singletonList(dish.getId()));
         List<DishFlavor> flavors = dishDTO.getFlavors();
-        for (DishFlavor flavor : flavors) {
-            flavor.setDishId(dish.getId());
+        if (flavors != null && flavors.size() != 0){
+
+            for (DishFlavor flavor : flavors) {
+                flavor.setDishId(dish.getId());
+            }
+            flavorMapper.save(flavors);
         }
-        flavorMapper.save(flavors);
 
     }
 
@@ -131,6 +147,9 @@ public class DishServiceImpl implements DishService {
      */
     @Transactional
     public void delete(List<Long> ids) throws Exception {
+        //删除缓存数据，由于是批量删除，涉及多个分类，这里直接删除所有菜品缓存
+        deleteCache("dish_*");
+
         //删除菜品是敏感操作，涉及到多方面，故
         //检查菜品是否在售
         for (Long id : ids) {
@@ -165,5 +184,13 @@ public class DishServiceImpl implements DishService {
         }
 
         return list;
+    }
+
+    /**
+     * 删除缓存数据
+     */
+    private void deleteCache(String pattern){
+        Set keys = redisTemplate.keys(pattern);
+        redisTemplate.delete(keys);
     }
 }
