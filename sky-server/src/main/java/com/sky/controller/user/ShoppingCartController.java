@@ -8,10 +8,9 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController("userShoppingCart")
 @RequestMapping("/user/shoppingCart")
@@ -25,10 +24,27 @@ public class ShoppingCartController {
         this.shoppingCartService = shoppingCartService;
     }
 
+    /**
+     * 购物车添加商品
+     * @param shoppingCartDTO
+     * @return
+     */
     @PostMapping("/add")
     @ApiOperation("购物车添加商品")
     public Result add(@RequestBody ShoppingCartDTO shoppingCartDTO){
         shoppingCartService.add(shoppingCartDTO);
         return Result.success();
     }
+
+    /**
+     * 查看购物车
+     * @return
+     */
+    @GetMapping("/list")
+    @ApiOperation("查看购物车")
+    public Result<List<ShoppingCart>> list(){
+        List<ShoppingCart> list = shoppingCartService.list();
+        return Result.success(list);
+    }
+
 }

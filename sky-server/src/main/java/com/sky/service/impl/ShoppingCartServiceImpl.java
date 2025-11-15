@@ -8,9 +8,12 @@ import com.sky.entity.ShoppingCart;
 import com.sky.mapper.DishMapper;
 import com.sky.mapper.SetMealMapper;
 import com.sky.mapper.ShoppingCartMapper;
+import com.sky.result.Result;
 import com.sky.service.ShoppingCartService;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -73,4 +76,21 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
             shoppingCartMapper.insert(shoppingCart);
         }
     }
+
+    /**
+     * 查看购物车
+     * @return
+     */
+    public List<ShoppingCart> list() {
+        Long currentId = BaseContext.getCurrentId();
+        ShoppingCart cart = ShoppingCart.builder()
+                .userId(currentId)
+                .build();
+        List<ShoppingCart> list = shoppingCartMapper.list(cart);
+        return list;
+    }
+
+
+
+
 }
