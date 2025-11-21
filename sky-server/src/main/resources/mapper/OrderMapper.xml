@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sky.mapper.OrderMapper">
+
+
+    <select id="page" resultType="com.sky.entity.Orders">
+        select * from orders
+        <where>
+            <if test="number != null and number.size() > 0">
+                and number = #{number}
+            </if>
+            <if test="phone != null and phone.size() > 0">
+                and phone = #{phone}
+            </if>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+            <if test="beginTime != null and beginTime.size() > 0">
+                and begin_time = #{beginTime}
+            </if>
+            <if test="endTime != null and endTime.size() > 0">
+                and end_time = #{endTime}
+            </if>
+            and user_id = #{userId}
+
+            ORDER BY order_time DESC
+         </where>
+    </select>
+</mapper>

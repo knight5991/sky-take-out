@@ -1,10 +1,13 @@
 package com.sky.mapper;
 
+import com.github.pagehelper.Page;
+import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.entity.Orders;
 import lombok.Generated;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Options;
+import org.apache.ibatis.annotations.Update;
 
 @Mapper
 public interface OrderMapper {
@@ -21,4 +24,18 @@ public interface OrderMapper {
             "#{estimatedDeliveryTime},#{deliveryStatus},#{deliveryTime},#{packAmount},#{tablewareNumber},#{tablewareStatus})")
     @Options(useGeneratedKeys = true,keyProperty = "id")
     void insert(Orders orders);
+
+    /**
+     * 更新订单方法
+     * @param orders
+     */
+    @Update("update orders set status = #{status},pay_status =#{payStatus},checkout_time = #{checkoutTime} where number  = #{number}")
+    void update(Orders orders);
+
+    /**
+     * 分页查询订单数据
+     * @param queryDTO
+     * @return
+     */
+    Page<Orders> page(OrdersPageQueryDTO queryDTO);
 }
