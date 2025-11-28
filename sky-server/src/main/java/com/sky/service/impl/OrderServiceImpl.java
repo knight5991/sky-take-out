@@ -1,5 +1,6 @@
 package com.sky.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
@@ -8,6 +9,7 @@ import com.sky.context.BaseContext;
 import com.sky.dto.*;
 import com.sky.entity.*;
 import com.sky.exception.AddressBookBusinessException;
+import com.sky.exception.OrderBusinessException;
 import com.sky.exception.ShoppingCartBusinessException;
 import com.sky.mapper.AddressBookMapper;
 import com.sky.mapper.OrderDetailMapper;
@@ -16,15 +18,18 @@ import com.sky.mapper.ShoppingCartMapper;
 import com.sky.result.PageResult;
 import com.sky.service.OrderService;
 import com.sky.vo.*;
+import com.sky.websocket.WebSocketServer;
+import io.swagger.util.Json;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -34,12 +39,13 @@ public class OrderServiceImpl implements OrderService {
     private final OrderDetailMapper orderDetailMapper;
     private final AddressBookMapper addressBookMapper;
 
-
-    public OrderServiceImpl(OrderMapper orderMapper, ShoppingCartMapper shoppingCartMapper, OrderDetailMapper orderDetailMapper, AddressBookMapper addressBookMapper) {
+    private final WebSocketServer webSocketServer;
+    public OrderServiceImpl(OrderMapper orderMapper, ShoppingCartMapper shoppingCartMapper, OrderDetailMapper orderDetailMapper, AddressBookMapper addressBookMapper, WebSocketServer webSocketServer) {
         this.orderMapper = orderMapper;
         this.shoppingCartMapper = shoppingCartMapper;
         this.orderDetailMapper = orderDetailMapper;
         this.addressBookMapper = addressBookMapper;
+        this.webSocketServer = webSocketServer;
     }
 
     /**
@@ -143,6 +149,16 @@ public class OrderServiceImpl implements OrderService {
                 .number(ordersPaymentDTO.getOrderNumber())
                 .build();
         orderMapper.update(orders);
+
+        //调用websocket接口实现通信，通知商家端有新订单
+        Map map = new HashMap();
+        map.put("type",1);
+        map.put("orderId",orders.getId());
+        map.put("content","订单号："+ordersPaymentDTO.getOrderNumber());
+        String s = JSON.toJSONString(map);
+        webSocketServer.sendToAllClient(s);
+
+
         return vo;
 
     }
@@ -325,5 +341,25 @@ public class OrderServiceImpl implements OrderService {
         orders.setId(id);
         orders.setStatus(Orders.COMPLETED);
         orderMapper.update(orders);
+    }
+
+    /**
+     * 用户催单
+     * @param id
+     * @return
+     */
+    public void reminder(Long id) {
+        Orders orders = orderMapper.getById(id);
+        if (orders == null){
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+        //调用websocket接口实现通信，进行催单
+        Map map = new HashMap();
+        map.put("type",2);
+        map.put("orderId",id);
+        map.put("content","订单号："+ orders.getNumber());
+        String s = JSON.toJSONString(map);
+        webSocketServer.sendToAllClient(s);
+
     }
 }
