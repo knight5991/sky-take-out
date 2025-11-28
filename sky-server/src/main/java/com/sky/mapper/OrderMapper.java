@@ -3,11 +3,9 @@ package com.sky.mapper;
 import com.github.pagehelper.Page;
 import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.entity.Orders;
+import com.sky.vo.OrderStatisticsVO;
 import lombok.Generated;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Options;
-import org.apache.ibatis.annotations.Update;
+import org.apache.ibatis.annotations.*;
 
 @Mapper
 public interface OrderMapper {
@@ -29,7 +27,7 @@ public interface OrderMapper {
      * 更新订单方法
      * @param orders
      */
-    @Update("update orders set status = #{status},pay_status =#{payStatus},checkout_time = #{checkoutTime} where number  = #{number}")
+
     void update(Orders orders);
 
     /**
@@ -38,4 +36,24 @@ public interface OrderMapper {
      * @return
      */
     Page<Orders> page(OrdersPageQueryDTO queryDTO);
+
+
+    /**
+     * 根据id查询订单
+     * @param id
+     * @return
+     */
+    @Select("select * from orders where id = #{id}")
+    Orders getById(Long id);
+
+    /**
+     * 查询各个订单状态数量统计
+     * @return
+     */
+    @Select("select " +
+            "SUM(case when status = 2 then 1 else 0 end) AS toBeConfirmed," +
+            "SUM(case when status = 3 then 1 else 0 end) AS confirmed," +
+            "SUM(case when status = 4 then 1 else 0 end) AS deliveryInProgress" +
+            " from orders")
+    OrderStatisticsVO getStatistics();
 }
