@@ -7,6 +7,9 @@ import com.sky.vo.OrderStatisticsVO;
 import lombok.Generated;
 import org.apache.ibatis.annotations.*;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 @Mapper
 public interface OrderMapper {
     /**
@@ -56,4 +59,13 @@ public interface OrderMapper {
             "SUM(case when status = 4 then 1 else 0 end) AS deliveryInProgress" +
             " from orders")
     OrderStatisticsVO getStatistics();
+
+    /**
+     * 根据订单状态和订单时间处理超时订单
+     * @param pendingPayment
+     * @param lastTime
+     * @return
+     */
+    @Select("select * from orders where status = #{status} and order_time < #{lastTime}")
+    List<Orders> getByStatusAndOrderTimeLT(Integer status, LocalDateTime lastTime);
 }
