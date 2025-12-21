@@ -8,4 +8,6 @@ import java.util.Map;
 public interface ReportMapper {
 
     Double sumByMap(Map map);
+
+    Integer numberByMap(Map map);
 }
