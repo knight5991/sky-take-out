@@ -3,8 +3,10 @@ package com.sky.service.impl;
 import com.alibaba.druid.util.StringUtils;
 import com.sky.entity.Orders;
 import com.sky.mapper.ReportMapper;
+import com.sky.mapper.UserMapper;
 import com.sky.service.ReportService;
 import com.sky.vo.TurnoverReportVO;
+import com.sky.vo.UserReportVO;
 import org.apache.poi.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,13 +23,16 @@ import java.util.Map;
 public class ReportServiceImpl implements ReportService {
     @Autowired
     ReportMapper reportMapper;
+
+    @Autowired
+    UserMapper userMapper;
     /**
      * 根据日期获取营业额记录
      * @param begin
      * @param end
      * @return
      */
-    public TurnoverReportVO getReportVo(LocalDate begin, LocalDate end) {
+    public TurnoverReportVO turnoverStatistics(LocalDate begin, LocalDate end) {
         List<LocalDate> dateList = new ArrayList();  //日期列表
         dateList.add(begin);
         while(!begin.equals(end)){
@@ -57,5 +62,42 @@ public class ReportServiceImpl implements ReportService {
                 dateList(StringUtil.join(",", dateList)).
                 turnoverList(StringUtil.join(",", turnOverList)).
                 build();
+    }
+
+    /**
+     * 根据日期获取用户统计数据
+     * @param begin
+     * @param end
+     * @return
+     */
+    public UserReportVO userStatistics(LocalDate begin, LocalDate end) {
+        List<LocalDate> dateList = new ArrayList<>();
+        dateList.add(begin);
+        while(!begin.equals(end)){
+            begin = begin.plusDays(1);
+            dateList.add(begin);
+        }
+        dateList.add(end);
+        List<Integer> totalUser = new ArrayList<>();
+        List<Integer> newUser = new ArrayList<>();
+        for (LocalDate localDate : dateList) {
+            LocalDateTime beginTime = LocalDateTime.of(localDate, LocalTime.MIN);
+            LocalDateTime endTime = LocalDateTime.of(localDate, LocalTime.MAX);
+            Map<String, LocalDateTime> map = new HashMap<>();
+            map.put("end", endTime);
+            Integer totalU = userMapper.numberByMap(map);
+            map.put("begin", beginTime);
+            Integer newU = userMapper.numberByMap(map);
+            totalUser.add(totalU);
+            newUser.add(newU);
+        }
+
+
+        return UserReportVO
+                .builder()
+                .dateList(StringUtil.join(",",dateList))
+                .totalUserList(StringUtil.join(",", totalUser))
+                .newUserList(StringUtil.join(",", newUser))
+                .build();
     }
 }
